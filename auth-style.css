@@ -1,0 +1,522 @@
+:root {
+  --green-100: #f0fdf4;
+  --green-200: #bbf7d0;
+  --green-300: #86efac;
+  --green-400: #22c55e;
+  --green-500: #16a34a;
+  --green-600: #15803d;
+  --green-700: #14532d;
+  --green-900: #052e16;
+  --red-500: #ef4444;
+  --bg: #f0fdf4;
+  --bg2: #ecfdf5;
+  --surface: #ffffff;
+  --border: #d1fae5;
+  --border2: #a7f3d0;
+  --text-primary: #052e16;
+  --text-secondary: #166534;
+  --text-muted: #6b9e73;
+  --mono: "DM Mono", monospace;
+  --display: "Syne", sans-serif;
+  --serif: "Instrument Serif", serif;
+  --radius: 20px;
+  --radius-sm: 10px;
+  --shadow: 0 4px 24px rgba(22, 101, 52, 0.1);
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html,
+body {
+  height: 100%;
+}
+body {
+  min-height: 100vh;
+  font-family: var(--display);
+  color: var(--text-primary);
+  background: var(--bg);
+}
+
+/* ── Shell: 2 kolom (form kiri, ilustrasi kanan) ── */
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(360px, 46%) 1fr;
+}
+
+/* ── Kolom kiri: form ── */
+.auth-form-col {
+  min-height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  background: var(--surface);
+}
+.auth-form-wrap {
+  width: 100%;
+  max-width: 420px;
+}
+
+.login-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.login-logo .leaf {
+  font-size: 24px;
+}
+.login-logo .name {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.login-logo .name em {
+  color: var(--green-500);
+  font-style: italic;
+  font-family: var(--serif);
+}
+
+/* ── Tombol Install / Download Aplikasi (pojok kanan atas) ── */
+.install-app-btn {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 50%;
+  color: #16a34a;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.install-app-btn:hover {
+  background: rgba(34, 197, 94, 0.18);
+  border-color: #22c55e;
+  transform: translateY(-1px);
+}
+
+.install-app-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+h1 {
+  font-size: 27px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+.subtitle {
+  color: var(--text-muted);
+  font-size: 13.5px;
+  margin-bottom: 16px;
+  line-height: 1.55;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+.field {
+  margin-bottom: 16px;
+  flex: 1;
+  min-width: 0;
+}
+.field-row {
+  display: flex;
+  gap: 12px;
+}
+.field-row .field {
+  margin-bottom: 16px;
+}
+
+label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+  width: 100%;
+  padding: 11px 13px;
+  font-size: 14.5px;
+  font-family: var(--display);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg2);
+  color: var(--text-primary);
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+input:focus {
+  border-color: var(--green-500);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+}
+
+.password-wrap {
+  position: relative;
+}
+.password-wrap input {
+  padding-right: 68px;
+}
+.toggle-pw {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  padding: 4px;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 4px 0 14px;
+  cursor: pointer;
+  line-height: 1.5;
+}
+.checkbox-row input {
+  margin-top: 3px;
+  accent-color: var(--green-500);
+}
+.checkbox-row a {
+  color: var(--green-600);
+  text-decoration: underline;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 13px;
+  margin-top: 4px;
+  background: var(--green-500);
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.15s;
+  font-family: var(--display);
+}
+.btn-submit:hover {
+  background: var(--green-600);
+  transform: translateY(-1px);
+}
+.btn-submit:active {
+  transform: translateY(0);
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--red-500);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  margin-bottom: 18px;
+}
+.alert.success {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: var(--border2);
+  color: var(--green-700);
+}
+
+.switch-link {
+  margin-top: 16px;
+  font-size: 13.5px;
+  color: var(--text-muted);
+  text-align: center;
+}
+.switch-link a {
+  color: var(--green-600);
+  font-weight: 700;
+  text-decoration: none;
+}
+.switch-link a:hover {
+  text-decoration: underline;
+}
+
+.demo-hint {
+  margin-top: 16px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border: 1px dashed var(--border2);
+  border-radius: var(--radius-sm);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+.demo-hint b {
+  color: var(--text-secondary);
+}
+
+/* ── Kolom kanan: panel ilustrasi hijau tua ── */
+.auth-visual-col {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 20% 15%,
+      rgba(74, 222, 128, 0.25),
+      transparent 45%
+    ),
+    radial-gradient(circle at 85% 85%, rgba(34, 197, 94, 0.2), transparent 50%),
+    linear-gradient(
+      160deg,
+      var(--green-900) 0%,
+      #0a3d20 55%,
+      var(--green-700) 100%
+    );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+}
+.visual-dotgrid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(
+    rgba(255, 255, 255, 0.18) 1.4px,
+    transparent 1.4px
+  );
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(
+    ellipse 70% 70% at 75% 75%,
+    black 40%,
+    transparent 75%
+  );
+  mask-image: radial-gradient(
+    ellipse 70% 70% at 75% 75%,
+    black 40%,
+    transparent 75%
+  );
+  pointer-events: none;
+}
+.visual-content {
+  position: relative;
+  z-index: 1;
+  max-width: 420px;
+  color: #fff;
+}
+
+.visual-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+  padding: 22px 22px 18px;
+  backdrop-filter: blur(6px);
+  margin-bottom: 34px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+.visual-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 10px;
+}
+.visual-badge {
+  background: rgba(74, 222, 128, 0.2);
+  color: #86efac;
+  padding: 2px 9px;
+  border-radius: 100px;
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+}
+.visual-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-bottom: 16px;
+}
+.visual-ring-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.visual-ring-label .v-title {
+  font-size: 14px;
+  font-weight: 700;
+}
+.visual-ring-label .v-sub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 2px;
+}
+
+.visual-content h2 {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+  line-height: 1.25;
+}
+.visual-content p {
+  font-size: 14.5px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.65;
+}
+
+@media (max-width: 860px) {
+  .auth-shell {
+    grid-template-columns: 1fr;
+    position: relative;
+    background:
+      radial-gradient(
+        circle at 20% 15%,
+        rgba(74, 222, 128, 0.25),
+        transparent 45%
+      ),
+      radial-gradient(
+        circle at 85% 85%,
+        rgba(34, 197, 94, 0.2),
+        transparent 50%
+      ),
+      linear-gradient(
+        160deg,
+        var(--green-900) 0%,
+        #0a3d20 55%,
+        var(--green-700) 100%
+      );
+  }
+  /* Titik-titik dekoratif, meniru tekstur panel ilustrasi desktop */
+  .auth-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(
+      rgba(255, 255, 255, 0.16) 1.4px,
+      transparent 1.4px
+    );
+    background-size: 22px 22px;
+    -webkit-mask-image: radial-gradient(
+      ellipse 80% 60% at 50% 0%,
+      black 40%,
+      transparent 80%
+    );
+    mask-image: radial-gradient(
+      ellipse 80% 60% at 50% 0%,
+      black 40%,
+      transparent 80%
+    );
+    pointer-events: none;
+  }
+  .auth-visual-col {
+    display: none;
+  }
+  .auth-form-col {
+    position: relative;
+    z-index: 1;
+    padding: 32px 20px;
+    background: transparent;
+  }
+  /* ── Pembatas kotak (card) untuk form di mobile ── */
+  .auth-form-wrap {
+    background: var(--surface);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: var(--radius);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    padding: 28px 24px;
+  }
+}
+
+/* ── Tablet kecil & HP: field-row (Nama+Username, Password+Konfirmasi)
+      dipaksa jadi 1 kolom biar input tidak sempit & tombol "Lihat"
+      tidak menabrak teks yang diketik ── */
+@media (max-width: 600px) {
+  html, body {
+    overflow-x: hidden;
+  }
+  .field-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  .field-row .field {
+    margin-bottom: 16px;
+  }
+}
+
+/* ── HP kecil (≤ 420px): rapatkan spacing & kecilkan tipografi
+      supaya form tidak terasa sesak / overflow ── */
+@media (max-width: 420px) {
+  .auth-form-col {
+    padding: 20px 14px;
+  }
+  .auth-form-wrap {
+    padding: 22px 18px;
+    border-radius: var(--radius-sm);
+  }
+  .login-logo {
+    margin-bottom: 14px;
+  }
+  .login-logo .leaf {
+    font-size: 20px;
+  }
+  .login-logo .name {
+    font-size: 17px;
+  }
+  h1 {
+    font-size: 22px;
+  }
+  .subtitle {
+    font-size: 12.5px;
+    margin-bottom: 14px;
+  }
+  input[type="text"],
+  input[type="password"],
+  input[type="email"] {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  .password-wrap input {
+    padding-right: 60px;
+  }
+  .toggle-pw {
+    font-size: 11px;
+  }
+  .btn-submit {
+    padding: 12px;
+    font-size: 14.5px;
+  }
+  .demo-hint {
+    font-size: 11px;
+    padding: 8px 12px;
+  }
+}

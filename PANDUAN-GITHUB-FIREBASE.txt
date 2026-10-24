@@ -1,0 +1,37 @@
+PANDUAN DEPLOY WEBSITE HIDROPONIK KE GITHUB PAGES
+
+ZIP ini mempertahankan tampilan website asli dan menambahkan integrasi Firebase Authentication + Realtime Database.
+
+A. SEBELUM HOSTING
+1. Firebase Console > Authentication > Sign-in method: aktifkan Email/Password.
+2. Authentication > Users: pastikan akun admin yang digunakan memang ada. Jangan menaruh password di file website.
+3. Authentication > Settings > Authorized domains: tambahkan username.github.io (setelah tahu username GitHub).
+4. Realtime Database > Rules: izinkan akun yang login membaca/menulis hanya node yang diperlukan. UID pada rules harus PERSIS sama dengan UID di Authentication > Users. UID yang diketik berbeda satu karakter saja akan ditolak.
+5. Pastikan database memiliki node Boolean:
+   Pompa/Nutrisi A = false
+   Pompa/Nutrisi B = false
+   Pompa/pH-Up = false
+   Pompa/pH-Down = false
+
+B. UPLOAD KE GITHUB
+1. Ekstrak ZIP ini.
+2. Buat repository baru, misalnya hidroponik-pakcoy.
+3. Upload semua ISI folder ZIP (index.html, login.html, dashboard.html, CSS, JS, folder icons) ke root repository, bukan folder pembungkus `site`.
+4. Repository > Settings > Pages > Deploy from a branch > main > /(root) > Save.
+5. Tunggu alamat https://USERNAME.github.io/NAMA-REPOSITORY/ aktif.
+6. Tambahkan username.github.io ke Firebase Authentication > Authorized domains.
+7. Buka URL GitHub Pages, login menggunakan EMAIL dan PASSWORD akun Firebase Authentication.
+
+C. TEST
+1. Buka Firebase Realtime Database pada node /Pompa.
+2. Di web, ON/OFF satu pompa. Boolean terkait seharusnya berubah true/false.
+3. ESP32 harus terhubung Wi-Fi, Firebase, menggunakan FirebaseClient atau library yang cocok, dan akun ESP32 juga harus memiliki izin rules.
+4. Periksa Serial Monitor pada 115200 baud.
+
+PENTING
+- Jangan menaruh password akun Firebase ke file JavaScript atau GitHub. File ini meminta email/password melalui form login dan memakai Firebase Authentication.
+- Firebase API key web adalah konfigurasi client, bukan password. Rules dan Authentication yang mengamankan data.
+- Jangan memakai rules publik .read/.write = true.
+- Kode ini mengendalikan nilai manual pada /Pompa; tidak menjamin keamanan elektrik. Uji tanpa pompa dulu.
+- Sebelumnya board ESP32 dilaporkan cepat panas. Jangan sambungkan ke daya lagi sampai masalah panas/short diperiksa.
+- UID rules harus dicocokkan persis dengan UID Firebase Authentication. UID yang dikirim di chat tampak perlu diverifikasi di console.

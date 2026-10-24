@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Masuk — SmartGarden</title>
+
+<!-- ===== PWA ===== -->
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#16a34a" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="SmartGarden" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="auth-style.css" />
+<script>
+  // Kalau sudah login, langsung lempar ke dashboard (tidak perlu login ulang).
+  if (localStorage.getItem('sgAuthToken')) {
+    window.location.replace('dashboard.html');
+  }
+</script>
+</head>
+<body>
+  <!-- Tombol Install App (muncul otomatis kalau browser mendeteksi PWA installable) -->
+  <button id="install-app-btn" class="install-app-btn" aria-label="Install / download aplikasi"
+      title="Install Aplikasi" style="display:none;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+          stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="4" width="14" height="10" rx="1.5" />
+          <path d="M6 18h6" />
+          <path d="M9 14v4" />
+          <path d="M18 11.5v6" />
+          <path d="M15.3 15.2 18 17.5l2.7-2.3" />
+      </svg>
+  </button>
+
+  <div class="auth-shell">
+
+    <!-- ───────── Kolom kiri: Form ───────── -->
+    <div class="auth-form-col">
+      <div class="auth-form-wrap">
+        <div class="login-logo">
+          <span class="leaf">🌱</span>
+          <span class="name">Smart<em>Garden</em></span>
+        </div>
+
+        <h1>Masuk ke Akun</h1>
+        <p class="subtitle">Login untuk mengakses dashboard monitoring IoT Sawi Garden Anda.</p>
+
+        <!-- Alert diisi otomatis lewat JS berdasarkan query string (?error=1, ?registered, ?logged_out) -->
+        <div id="alertBox" class="alert" style="display:none;"></div>
+
+        <form id="loginForm" autocomplete="on">
+          <input type="hidden" name="redirect" id="redirectField" value="dashboard.html" />
+          <div class="field">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="email" type="email" autocomplete="username" placeholder="username" required autofocus />
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="password-wrap">
+              <input type="password" id="password" name="password" placeholder="••••••••" required />
+              <button type="button" class="toggle-pw" onclick="togglePw('password', this)">Lihat</button>
+            </div>
+          </div>
+          <button type="submit" class="btn-submit">Masuk →</button>
+        </form>
+
+        <p class="switch-link">Belum punya akun? <a href="register.html">Daftar</a></p>
+      </div>
+    </div>
+
+    <!-- ───────── Kolom kanan: Panel ilustrasi ───────── -->
+    <div class="auth-visual-col">
+      <div class="visual-dotgrid"></div>
+      <div class="visual-content">
+        <div class="visual-card">
+          <div class="visual-card-header">
+            <span>Kelembapan Tanah</span>
+            <span class="visual-badge">Live</span>
+          </div>
+          <svg class="visual-chart" viewBox="0 0 260 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polyline points="0,60 30,45 60,55 90,30 120,40 150,20 180,35 210,15 240,28 260,10"
+              stroke="#bbf7d0" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="0,60 30,45 60,55 90,30 120,40 150,20 180,35 210,15 240,28 260,10"
+              stroke="#ffffff" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+          </svg>
+          <div class="visual-ring-row">
+            <svg viewBox="0 0 80 80" width="72" height="72">
+              <circle cx="40" cy="40" r="32" stroke="rgba(255,255,255,0.15)" stroke-width="10" fill="none"/>
+              <circle cx="40" cy="40" r="32" stroke="#4ade80" stroke-width="10" fill="none"
+                stroke-dasharray="201" stroke-dashoffset="55" stroke-linecap="round" transform="rotate(-90 40 40)"/>
+              <text x="40" y="46" text-anchor="middle" fill="#ffffff" font-size="18" font-family="Syne, sans-serif" font-weight="700">72%</text>
+            </svg>
+            <div class="visual-ring-label">
+              <div class="v-title">Sangat Ideal</div>
+              <div class="v-sub">Untuk pertumbuhan sawi</div>
+            </div>
+          </div>
+        </div>
+
+        <h2>Sangat mudah untuk memulai</h2>
+        <p>Satu dashboard untuk suhu, kelembapan, pH, dan ketinggian air — lengkap dengan notifikasi real-time ke ponsel Anda.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="login.js"></script>
+</body>
+</html>

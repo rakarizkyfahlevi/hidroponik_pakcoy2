@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      // Penjaga login: kalau belum login, langsung lempar ke halaman login
+      // sebelum konten dashboard sempat dirender.
+      if (!localStorage.getItem("sgAuthToken")) {
+        window.location.replace("login.html?redirect=dashboard.html");
+      }
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SmartGarden — IoT Monitoring Sawi</title>
+
+    <!-- ===== PWA ===== -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#16a34a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="SmartGarden" />
+    <link rel="icon" href="icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="dashboard.css?v=20261023h" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.3.1"></script>
+  </head>
+
+  <body>
+    <!-- LOADER -->
+    <div id="loader">
+      <div class="loader-inner">
+        <div class="loader-plant">
+          <svg
+            viewBox="0 0 80 80"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              class="stem"
+              d="M40 70 Q40 45 40 30"
+              stroke="#22c55e"
+              stroke-width="2.5"
+              stroke-linecap="round"
+            />
+            <path
+              class="leaf leaf-l"
+              d="M40 45 Q25 38 20 25 Q35 28 40 45Z"
+              fill="#22c55e"
+            />
+            <path
+              class="leaf leaf-r"
+              d="M40 38 Q55 30 58 17 Q44 22 40 38Z"
+              fill="#16a34a"
+            />
+            <circle class="berry berry1" cx="38" cy="26" r="4" fill="#f43f5e" />
+            <circle class="berry berry2" cx="45" cy="22" r="3" fill="#fb7185" />
+            <circle
+              class="berry berry3"
+              cx="32"
+              cy="22"
+              r="3.5"
+              fill="#e11d48"
+            />
+          </svg>
+        </div>
+        <p class="loader-text">Memuat Smart Garden<span class="dots"></span></p>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div id="navbar-outer">
+      <nav id="navbar">
+        <div class="nav-logo">
+          <svg class="nav-icon" viewBox="0 0 32 32" fill="none">
+            <path
+              d="M16 28 Q16 18 16 12"
+              stroke="#22c55e"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+            <path d="M16 18 Q8 14 6 7 Q14 10 16 18Z" fill="#22c55e" />
+            <path d="M16 14 Q24 10 26 3 Q18 7 16 14Z" fill="#16a34a" />
+            <circle cx="15" cy="10" r="2.5" fill="#f43f5e" />
+            <circle cx="19" cy="7" r="2" fill="#fb7185" />
+          </svg>
+          <span class="logo-text">Smart<em>Garden</em></span>
+        </div>
+
+        <!-- USER SIDEBAR -->
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar">👤</div>
+
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="sidebarUserName">Pengguna</div>
+
+            <div class="sidebar-user-handle" id="sidebarUserHandle">
+              @pengguna
+            </div>
+          </div>
+        </div>
+
+        <ul class="nav-links" id="nav-links">
+          <li><a href="#dashboard" class="nav-link active">Dashboard</a></li>
+          <li><a href="#manual-control" class="nav-link">Manual Control</a></li>
+          <li><a href="#garden3d" class="nav-link">3D Garden</a></li>
+          <li><a href="#analytics" class="nav-link">Analitik</a></li>
+          <a
+            href="#"
+            id="logoutBtn"
+            class="sidebar-logout"
+            title="Keluar dari akun"
+          >
+            🚪 <span>Keluar</span>
+          </a>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Backdrop gelap saat sidebar dibuka di layar mobile -->
+    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
+    <!-- HEADER (TOPBAR) -->
+    <header id="topbar">
+      <div class="topbar-left">
+        <button
+          id="nav-hamburger"
+          class="nav-hamburger"
+          aria-label="Buka/tutup sidebar"
+          aria-expanded="false"
+        >
+          <span></span><span></span><span></span>
+        </button>
+        <span class="topbar-title" id="topbar-title">Dashboard</span>
+      </div>
+
+      <div class="topbar-right">
+        <span class="status-pill">
+          <span class="status-dot pulse"></span>
+          <span class="status-text">Live</span>
+        </span>
+
+        <button
+          id="install-app-btn"
+          class="install-app-btn"
+          aria-label="Install / download aplikasi"
+          title="Install Aplikasi"
+          style="display: none"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="2" y="4" width="14" height="10" rx="1.5" />
+            <path d="M6 18h6" />
+            <path d="M9 14v4" />
+            <path d="M18 11.5v6" />
+            <path d="M15.3 15.2 18 17.5l2.7-2.3" />
+          </svg>
+        </button>
+
+        <button
+          id="theme-toggle-btn"
+          class="theme-toggle-btn"
+          aria-label="Ganti mode gelap/terang"
+          aria-pressed="false"
+          title="Mode Gelap"
+        >
+          <span id="theme-toggle-icon">🌙</span>
+        </button>
+
+        <div class="notif-menu" id="notif-menu">
+          <button
+            id="notif-toggle-btn"
+            class="notif-toggle-btn"
+            aria-haspopup="true"
+            aria-expanded="false"
+            title="Notifikasi"
+          >
+            🔕
+          </button>
+          <div id="notif-dropdown" class="notif-dropdown">
+            <div class="notif-bar-text">
+              <span class="notif-bar-icon">🔔</span>
+              <div>
+                <strong>Notifikasi PPM &amp; pH</strong>
+                <span>
+                  Dapatkan notifikasi saat PPM atau pH berada di bawah batas
+                  minimal atau di atas batas maksimal yang ditentukan.
+                </span>
+              </div>
+            </div>
+            <div class="notif-bar-actions">
+              <button
+                id="btn-enable-notif"
+                class="notif-btn notif-btn-on"
+                title="Aktifkan notifikasi PPM tinggi"
+              >
+                🔔 <span id="notif-enable-label">Aktifkan Notifikasi</span>
+              </button>
+              <button
+                id="btn-disable-notif"
+                class="notif-btn notif-btn-off"
+                style="display: none"
+                title="Matikan notifikasi PPM tinggi"
+              >
+                🔕 <span id="notif-disable-label">Matikan Notifikasi</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- MANUAL CONTROL -->
+    <section id="manual-control" class="page-section">
+      <div class="section-header">
+        <h2 class="section-title">Manual Control</h2>
+      </div>
+
+      <div class="control-grid">
+        <div class="control-card" id="control-nutrisi-a">
+          <div class="card-header">
+            <div class="card-icon">💧</div>
+            <div class="card-meta">
+              <span class="card-label">Nutrisi A</span>
+              <span class="control-status" id="status-nutrisi-a">OFF</span>
+              <span class="control-count" id="count-nutrisi-a"
+                >Ditambahkan: 0x</span
+              >
+            </div>
+          </div>
+          <label class="control-switch">
+            <input
+              type="checkbox"
+              id="switch-nutrisi-a"
+              onchange="handleControlToggle('nutrisi-a', this.checked)"
+            />
+            <span class="control-slider"></span>
+          </label>
+        </div>
+
+        <div class="control-card" id="control-nutrisi-b">
+          <div class="card-header">
+            <div class="card-icon">🌿</div>
+            <div class="card-meta">
+              <span class="card-label">Nutrisi B</span>
+              <span class="control-status" id="status-nutrisi-b">OFF</span>
+              <span class="control-count" id="count-nutrisi-b"
+                >Ditambahkan: 0x</span
+              >
+            </div>
+          </div>
+          <label class="control-switch">
+            <input
+              type="checkbox"
+              id="switch-nutrisi-b"
+              onchange="handleControlToggle('nutrisi-b', this.checked)"
+            />
+            <span class="control-slider"></span>
+          </label>
+        </div>
+
+        <div class="control-card" id="control-ph-up">
+          <div class="card-header">
+            <div class="card-icon">⬆️</div>
+            <div class="card-meta">
+              <span class="card-label">pH Up</span>
+              <span class="control-status" id="status-ph-up">OFF</span>
+              <span class="control-count" id="count-ph-up"
+                >Ditambahkan: 0x</span
+              >
+            </div>
+          </div>
+          <label class="control-switch">
+            <input
+              type="checkbox"
+              id="switch-ph-up"
+              onchange="handleControlToggle('ph-up', this.checked)"
+            />
+            <span class="control-slider"></span>
+          </label>
+        </div>
+
+        <div class="control-card" id="control-ph-down">
+          <div class="card-header">
+            <div class="card-icon">⬇️</div>
+            <div class="card-meta">
+              <span class="card-label">pH Down</span>
+              <span class="control-status" id="status-ph-down">OFF</span>
+              <span class="control-count" id="count-ph-down"
+                >Ditambahkan: 0x</span
+              >
+            </div>
+          </div>
+          <label class="control-switch">
+            <input
+              type="checkbox"
+              id="switch-ph-down"
+              onchange="handleControlToggle('ph-down', this.checked)"
+            />
+            <span class="control-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="chart-card chart-main ppm-card" id="ppm-card">
+        <div class="chart-card-header">
+          <h4>Pengaturan PPM Nutrisi</h4>
+          <span class="ppm-badge" id="ppm-status-badge">--</span>
+        </div>
+        <div class="ppm-body">
+          <div class="ppm-current-col">
+            <span class="ppm-current-label">PPM Larutan Saat Ini</span>
+            <div class="ppm-current-value-wrap">
+              <span class="ppm-current-value" id="ppm-current-val">--</span>
+              <span class="ppm-unit">ppm</span>
+            </div>
+            <div class="card-bar-wrap">
+              <div class="card-bar ppm-bar-track">
+                <div
+                  class="card-bar-fill ppm-fill"
+                  id="ppm-bar"
+                  style="width: 0%"
+                ></div>
+                <div class="ideal-zone" id="ppm-ideal-zone"></div>
+              </div>
+              <span class="card-range" id="ppm-range-label"
+                >Ideal: -- – -- ppm</span
+              >
+            </div>
+          </div>
+          <form class="ppm-target-col" id="ppm-target-form">
+            <label>Atur Rentang PPM Ideal (Minimal &amp; Maksimal)</label>
+            <div class="ppm-target-input-row">
+              <input
+                type="number"
+                id="ppm-target-min-input"
+                min="0"
+                max="2000"
+                step="1"
+                placeholder="Min, cth: 800"
+              />
+              <input
+                type="number"
+                id="ppm-target-max-input"
+                min="0"
+                max="2000"
+                step="1"
+                placeholder="Max, cth: 1000"
+              />
+              <button type="submit" class="chart-btn ppm-save-btn">
+                Simpan
+              </button>
+            </div>
+            <p class="ppm-target-hint">
+              Notifikasi dikirim saat nilai PPM
+              <strong>di bawah batas minimal</strong> atau
+              <strong>di atas batas maksimal</strong> yang Anda tentukan.
+            </p>
+            <p class="ppm-target-hint notif-state-text"></p>
+          </form>
+        </div>
+      </div>
+
+      <div class="chart-card chart-main ppm-card" id="ph-settings-card">
+        <div class="chart-card-header">
+          <h4>Pengaturan pH Ideal</h4>
+          <span class="ppm-badge" id="ph-status-badge">--</span>
+        </div>
+        <div class="ppm-body">
+          <div class="ppm-current-col">
+            <span class="ppm-current-label">pH Saat Ini</span>
+            <div class="ppm-current-value-wrap">
+              <span class="ppm-current-value" id="ph-current-val">--</span>
+              <span class="ppm-unit">pH</span>
+            </div>
+            <div class="card-bar-wrap">
+              <div class="card-bar ppm-bar-track">
+                <div
+                  class="card-bar-fill ppm-fill"
+                  id="ph-settings-bar"
+                  style="width: 0%"
+                ></div>
+                <div class="ideal-zone" id="ph-ideal-zone"></div>
+              </div>
+              <span class="card-range" id="ph-range-label"
+                >Ideal: -- – -- pH</span
+              >
+            </div>
+          </div>
+          <form class="ppm-target-col" id="ph-target-form">
+            <label>Atur Rentang pH Ideal (Minimal &amp; Maksimal)</label>
+            <div class="ppm-target-input-row">
+              <input
+                type="number"
+                id="ph-target-min-input"
+                min="0"
+                max="14"
+                step="0.1"
+                placeholder="Min, cth: 6.0"
+              />
+              <input
+                type="number"
+                id="ph-target-max-input"
+                min="0"
+                max="14"
+                step="0.1"
+                placeholder="Max, cth: 7.0"
+              />
+              <button type="submit" class="chart-btn ppm-save-btn">
+                Simpan
+              </button>
+            </div>
+            <p class="ppm-target-hint">
+              Notifikasi dikirim saat nilai pH
+              <strong>di bawah batas minimal</strong> atau
+              <strong>di atas batas maksimal</strong> yang Anda tentukan.
+            </p>
+            <p class="ppm-target-hint notif-state-text"></p>
+          </form>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="page-section active-section">
+      <div class="section-header">
+        <h2 class="section-title">Dashboard Monitoring</h2>
+      </div>
+
+      <!-- SENSOR CARDS -->
+      <div class="sensor-grid">
+        <!-- Temperature -->
+        <div class="sensor-card" id="card-temp">
+          <div class="card-header">
+            <div class="card-icon temp-icon">🌡️</div>
+            <div class="card-meta">
+              <span class="card-label">Dsb18b20 · Suhu Air</span>
+              <span class="card-unit">°Celsius</span>
+            </div>
+          </div>
+          <div class="card-value-wrap">
+            <span class="card-value" id="temp-val">--</span>
+            <span class="card-unit-big">°C</span>
+          </div>
+          <div class="card-bar-wrap">
+            <div class="card-bar">
+              <div
+                class="card-bar-fill temp-fill"
+                id="temp-bar"
+                style="width: 0%"
+              ></div>
+            </div>
+            <span class="card-range">0 – 50°C</span>
+          </div>
+          <div class="card-trend" id="temp-trend">— Memuat data...</div>
+          <canvas class="mini-chart" id="chart-temp"></canvas>
+        </div>
+
+        <!-- Humidity (sensor tidak digunakan — disembunyikan, tetap dirender di background agar JS tidak error) -->
+        <div class="sensor-card" id="card-hum" style="display: none">
+          <div class="card-header">
+            <div class="card-icon hum-icon">💧</div>
+            <div class="card-meta">
+              <span class="card-label">dsb18b20 · Suhu Air</span>
+              <span class="card-unit">Persentase</span>
+            </div>
+          </div>
+          <div class="card-value-wrap">
+            <span class="card-value" id="hum-val">--</span>
+            <span class="card-unit-big">%</span>
+          </div>
+          <div class="card-bar-wrap">
+            <div class="card-bar">
+              <div
+                class="card-bar-fill hum-fill"
+                id="hum-bar"
+                style="width: 0%"
+              ></div>
+            </div>
+            <span class="card-range">0 – 100%</span>
+          </div>
+          <div class="card-trend" id="hum-trend">— Memuat data...</div>
+          <canvas class="mini-chart" id="chart-hum"></canvas>
+        </div>
+
+        <!-- Soil Moisture (sensor tidak digunakan — disembunyikan) -->
+        <div class="sensor-card" id="card-soil" style="display: none">
+          <div class="card-header">
+            <div class="card-icon soil-icon">🌍</div>
+            <div class="card-meta">
+              <span class="card-label">Sensor pH · Air</span>
+              <span class="card-unit">Persentase</span>
+            </div>
+          </div>
+          <div class="card-value-wrap">
+            <span class="card-value" id="soil-val">--</span>
+            <span class="card-unit-big">%</span>
+          </div>
+          <div class="card-bar-wrap">
+            <div class="card-bar">
+              <div
+                class="card-bar-fill soil-fill"
+                id="soil-bar"
+                style="width: 0%"
+              ></div>
+            </div>
+            <span class="card-range">0 – 100%</span>
+          </div>
+          <div class="card-trend" id="soil-trend">— Memuat data...</div>
+          <canvas class="mini-chart" id="chart-soil"></canvas>
+        </div>
+
+        <!-- Water Level (sensor tidak digunakan — disembunyikan) -->
+        <div class="sensor-card" id="card-dist" style="display: none">
+          <div class="card-header">
+            <div class="card-icon dist-icon">📡</div>
+            <div class="card-meta">
+              <span class="card-label">HC-SR04 · Level Air</span>
+              <span class="card-unit">Sentimeter</span>
+            </div>
+          </div>
+          <div class="card-value-wrap">
+            <span class="card-value" id="dist-val">--</span>
+            <span class="card-unit-big">cm</span>
+          </div>
+          <div class="water-tank" id="water-tank">
+            <div class="water-fill" id="water-fill"></div>
+            <div class="water-label" id="water-label">--</div>
+          </div>
+          <div class="card-trend" id="dist-trend">— Memuat data...</div>
+        </div>
+
+        <!-- PPM Nutrisi -->
+        <div class="sensor-card" id="card-ppm">
+          <div class="card-header">
+            <div class="card-icon ppm-icon">🧪</div>
+            <div class="card-meta">
+              <span class="card-label">TDS Meter · PPM</span>
+              <span class="card-unit">Larutan Nutrisi</span>
+            </div>
+          </div>
+          <div class="card-value-wrap">
+            <span class="card-value" id="ppm-dash-val">--</span>
+            <span class="card-unit-big">ppm</span>
+          </div>
+          <div class="card-bar-wrap">
+            <div class="card-bar">
+              <div
+                class="card-bar-fill ppm-fill"
+                id="ppm-dash-bar"
+                style="width: 0%"
+              ></div>
+            </div>
+            <span class="card-range">0 – 2000 ppm</span>
+          </div>
+          <div class="card-trend" id="ppm-dash-trend">— Memuat data...</div>
+          <canvas class="mini-chart" id="chart-ppm"></canvas>
+        </div>
+
+        <!-- pH -->
+        <div class="sensor-card" id="card-ph">
+          <div class="card-header">
+            <div class="card-icon ph-icon">🧪</div>
+            <div class="card-meta">
+              <span class="card-label">Sensor pH · Air</span>
+              <span class="card-unit">Skala 0–14</span>
+            </div>
+          </div>
+          <div class="card-value-wrap">
+            <span class="card-value" id="ph-val">--</span>
+            <span class="card-unit-big">pH</span>
+          </div>
+          <div class="card-bar-wrap">
+            <div class="card-bar">
+              <div
+                class="card-bar-fill ph-fill"
+                id="ph-bar"
+                style="width: 0%"
+              ></div>
+            </div>
+            <span class="card-range">0 – 14 pH</span>
+          </div>
+          <div class="card-trend" id="ph-trend">— Memuat data...</div>
+          <canvas class="mini-chart" id="chart-ph"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3D GARDEN SECTION -->
+    <section id="garden3d" class="page-section">
+      <div class="section-header">
+        <h2 class="section-title">3D Sawi Garden</h2>
+      </div>
+      <div class="garden3d-wrap">
+        <canvas id="garden-canvas"></canvas>
+        <div class="garden3d-overlay" style="justify-content: flex-end">
+          <div class="g3d-controls">
+            <button class="g3d-btn active" id="btn-rotate">
+              ⟳ Auto Rotate
+            </button>
+            <button class="g3d-btn" id="btn-top">⊙ Top View</button>
+            <button class="g3d-btn" id="btn-rain">💦 Simulasi Embun</button>
+          </div>
+        </div>
+        <div class="garden3d-info">
+          <div class="g3d-metric">
+            <span class="g3d-label">Tanaman Sawi</span>
+            <span class="g3d-val">72 Bibit</span>
+          </div>
+          <div class="g3d-metric">
+            <span class="g3d-label">Kupu-kupu</span>
+            <span class="g3d-val">6 Aktif 🦋</span>
+          </div>
+          <div class="g3d-metric">
+            <span class="g3d-label">Last Update</span>
+            <span class="g3d-val" id="g3d-lastupdate">—</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ANALYTICS SECTION -->
+    <section id="analytics" class="page-section">
+      <div class="section-header">
+        <h2 class="section-title">Data Analytics</h2>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-card chart-main">
+          <div class="chart-card-header">
+            <h4>Suhu (°C)</h4>
+            <div class="chart-actions" id="chart-actions-temp">
+              <button
+                class="chart-btn active"
+                data-period="24h"
+                data-chart="temp"
+              >
+                24H
+              </button>
+              <button class="chart-btn" data-period="7d" data-chart="temp">
+                7D
+              </button>
+              <button class="chart-btn" data-period="30d" data-chart="temp">
+                30D
+              </button>
+            </div>
+          </div>
+          <canvas id="chart-temp-main"></canvas>
+        </div>
+        <div class="chart-card chart-main" style="display: none">
+          <div class="chart-card-header">
+            <h4>Kelembapan Udara (%)</h4>
+            <div class="chart-actions" id="chart-actions-hum">
+              <button
+                class="chart-btn active"
+                data-period="24h"
+                data-chart="hum"
+              >
+                24H
+              </button>
+              <button class="chart-btn" data-period="7d" data-chart="hum">
+                7D
+              </button>
+              <button class="chart-btn" data-period="30d" data-chart="hum">
+                30D
+              </button>
+            </div>
+          </div>
+          <canvas id="chart-hum-main"></canvas>
+        </div>
+        <div class="chart-card chart-main" style="display: none">
+          <div class="chart-card-header">
+            <h4>pH Air (%)</h4>
+            <div class="chart-actions" id="chart-actions-soil">
+              <button
+                class="chart-btn active"
+                data-period="24h"
+                data-chart="soil"
+              >
+                24H
+              </button>
+              <button class="chart-btn" data-period="7d" data-chart="soil">
+                7D
+              </button>
+              <button class="chart-btn" data-period="30d" data-chart="soil">
+                30D
+              </button>
+            </div>
+          </div>
+          <canvas id="chart-soil-main"></canvas>
+        </div>
+        <div class="chart-card chart-main" style="display: none">
+          <div class="chart-card-header">
+            <h4>Level Air Tangki (cm)</h4>
+            <div class="chart-actions" id="chart-actions-dist">
+              <button
+                class="chart-btn active"
+                data-period="24h"
+                data-chart="dist"
+              >
+                24H
+              </button>
+              <button class="chart-btn" data-period="7d" data-chart="dist">
+                7D
+              </button>
+              <button class="chart-btn" data-period="30d" data-chart="dist">
+                30D
+              </button>
+            </div>
+          </div>
+          <canvas id="chart-water-main"></canvas>
+        </div>
+        <div class="chart-card chart-main">
+          <div class="chart-card-header">
+            <h4>PPM Larutan Nutrisi</h4>
+            <div class="chart-actions" id="chart-actions-ppm">
+              <button
+                class="chart-btn active"
+                data-period="24h"
+                data-chart="ppm"
+              >
+                24H
+              </button>
+              <button class="chart-btn" data-period="7d" data-chart="ppm">
+                7D
+              </button>
+              <button class="chart-btn" data-period="30d" data-chart="ppm">
+                30D
+              </button>
+            </div>
+          </div>
+          <canvas id="chart-ppm-main"></canvas>
+        </div>
+        <div class="chart-card chart-main">
+          <div class="chart-card-header">
+            <h4>pH Air</h4>
+            <div class="chart-actions" id="chart-actions-ph">
+              <button
+                class="chart-btn active"
+                data-period="24h"
+                data-chart="ph"
+              >
+                24H
+              </button>
+              <button class="chart-btn" data-period="7d" data-chart="ph">
+                7D
+              </button>
+              <button class="chart-btn" data-period="30d" data-chart="ph">
+                30D
+              </button>
+            </div>
+          </div>
+          <canvas id="chart-ph-main"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOTIFICATIONS -->
+    <div id="notif-container"></div>
+
+    <!-- FOOTER -->
+    <footer id="footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <span class="logo-text">Smart<em>Garden</em></span>
+          <p>Sistem IoT Monitoring Tanaman Sawi</p>
+        </div>
+        <div class="footer-info">
+          <span>Skripsi — Teknik Informatika</span>
+          <span>ESP32</span>
+          <span id="app-version">Versi 20261023h</span>
+        </div>
+      </div>
+    </footer>
+
+    <script src="auth.js?v=20261023h"></script>
+    <script src="user-info.js?v=20261023h"></script>
+    <script src="dashboard.js?v=20261023h"></script>
+    <script>
+      // Diagnostik: kalau dashboard.js yang dimuat browser tidak cocok dengan
+      // halaman ini (file lama / cache / salah folder), tampilkan peringatan.
+      window.addEventListener("load", function () {
+        setTimeout(function () {
+          if (window.SG_JS_VERSION === "20261023h") return;
+          var d = document.createElement("div");
+          d.style.cssText =
+            "position:fixed;top:0;left:0;right:0;z-index:99999;background:#dc2626;color:#fff;padding:12px 16px;font:600 14px/1.4 sans-serif;text-align:center";
+          d.textContent =
+            "dashboard.js yang termuat BUKAN versi 20261023h (terbaca: " +
+            (window.SG_JS_VERSION || "versi lama") +
+            "). Timpa semua file di folder site dengan isi zip terbaru, lalu tekan Ctrl+Shift+R.";
+          document.body.appendChild(d);
+        }, 800);
+      });
+    </script>
+  </body>
+</html>

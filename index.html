@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<title>SmartGarden</title>
+<script>
+  // Titik masuk situs: lempar ke dashboard kalau sudah login,
+  // atau ke halaman login kalau belum.
+  window.location.replace(
+    localStorage.getItem('sgAuthToken') ? 'dashboard.html' : 'login.html'
+  );
+</script>
+</head>
+<body></body>
+</html>
